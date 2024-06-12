@@ -47,6 +47,7 @@ TelescopeClientASCOM::TelescopeClientASCOM(const QString& name, const QString& p
 
 	mAscomDevice = new ASCOMDevice(this, mAscomDeviceId);
 	mAscomDevice->connect();
+	updateConnectedState();
 	mDoesRefraction = mAscomDevice->doesRefraction();
 	mCoordinateType = mAscomDevice->getEquatorialCoordinateType();
 }
@@ -56,10 +57,16 @@ TelescopeClientASCOM::~TelescopeClientASCOM()
 	mAscomDevice->disconnect();
 }
 
+void TelescopeClientASCOM::updateConnectedState()
+{
+	isConnected_ = mAscomDevice->isDeviceConnected();
+}
+
 void TelescopeClientASCOM::performCommunication()
 {
 	qint64 now = getNow();
 
+	updateConnectedState();
 	if (now - mLastUpdateTime > 1000000)
 	{
 		ASCOMDevice::ASCOMCoordinates currentCoords = mAscomDevice->getCoordinates();
@@ -166,7 +173,7 @@ void TelescopeClientASCOM::telescopeAbortSlew()
 
 bool TelescopeClientASCOM::isConnected() const
 {
-	return mAscomDevice->isDeviceConnected();
+	return isConnected_;
 }
 
 bool TelescopeClientASCOM::hasKnownPosition() const

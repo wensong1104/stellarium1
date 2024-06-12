@@ -45,6 +45,7 @@ public:
 private:
 	bool prepareCommunication() override;
 	void performCommunication() override;
+	void updateConnectedState();
 
 	ASCOMDevice::ASCOMCoordinates j2000PosToAscomCoord(const Vec3d& j2000Pos);
 	QString mAscomDeviceId;
@@ -57,6 +58,7 @@ private:
 	Vec3d mInterpolatedPosition;
 	Vec3d mCurrentTargetPosition;
 	qint64 mLastUpdateTime;
+	bool isConnected_ = false;
 };
 
 #endif // TELESCOPECLIENTASCOM_HPP

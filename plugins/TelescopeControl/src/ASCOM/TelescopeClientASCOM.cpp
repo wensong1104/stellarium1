@@ -29,6 +29,8 @@
 #include "StelMainView.hpp"
 #include "StelTranslator.hpp"
 
+static bool inhibitComms = false;
+
 TelescopeClientASCOM::TelescopeClientASCOM(const QString& name, const QString& params, TelescopeControl::Equinox eq)
 	: TelescopeClient(name)
 	, mEquinox(eq)
@@ -64,6 +66,8 @@ void TelescopeClientASCOM::updateConnectedState()
 
 void TelescopeClientASCOM::performCommunication()
 {
+	if (inhibitComms) return;
+
 	qint64 now = getNow();
 
 	updateConnectedState();
@@ -146,8 +150,10 @@ void TelescopeClientASCOM::telescopeGoto(const Vec3d& j2000Pos, StelObjectP sele
 
 	if (mAscomDevice->isParked())
 	{
+		inhibitComms = true; // avoid doing OLE calls in the event loop of QMessageBox
 		QMessageBox::warning(&StelMainView::getInstance(), "Stellarium",
 		  q_("Can't slew a telescope which is parked. Unpark before performing any goto command."));
+		inhibitComms = false; // re-allow OLE calls
 		return;
 	}
 
